@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <flexLibProperties version="1">
-<includeClasses>
-<classEntry path="com.peterelst.air.sqlite.Query"/>
-<classEntry path="com.peterelst.air.sqlite.SQLite"/>
-</includeClasses>
+<includeClasses/>
 <includeResources/>
 <namespaceManifests/>
 </flexLibProperties>
