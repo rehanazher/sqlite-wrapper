@@ -18,9 +18,10 @@ package org.sqlitewrapper {
 	public class Logger extends EventDispatcher {
 		
 		private var _statement:String;
-		private var _data:Array;
+		private var _data:String;
 		private var _file:File;
 		private var _fileStream:FileStream;
+		private var _parameters:String;
 		
 		public function Logger():void {
 			_file = File.applicationStorageDirectory.resolvePath("applog.sql");
@@ -29,19 +30,32 @@ package org.sqlitewrapper {
 			purgeLog(); // truncate the log ready for reuse
 		}
 		
-		[Bindable]
+		//[Bindable]
 		public function get log():String {
 			var logData:String;
 			_fileStream.open(_file, FileMode.APPEND);
-			logData = _fileStream.readUTFBytes();
+			logData = _fileStream.readUTFBytes(_fileStream.bytesAvailable);
 			_fileStream.close();
 			return logData;
 		}
 		
 		// consider using openAsync() to avoid performance issues or impacting SQL performance
 
-		public function writeLog(statement:String):void {
-			_statement = statement;
+		public function writeLog(statement:SQLStatement):void {
+			var i:uint;
+			var len:uint = statement.parameters.length;
+			trace("len="+len);
+			
+			_statement = statement.text;
+			trace("statement "+_statement);
+			if(statement.parameters) {
+				for(i = 0; i < len; i++) {
+					_parameters += statement.parameters[i];
+					trace("parameters "+_parameters);
+				}
+			}
+			
+			
 			_data = _statement + "\n";
 			_fileStream.open(_file, FileMode.APPEND);
 			_fileStream.writeUTFBytes(_data);
