@@ -26,8 +26,6 @@ package org.sqlitewrapper {
 		
 		public function Logger():void {
 			
-			_parameters = new Array();
-			
 			_file = File.applicationStorageDirectory.resolvePath("applog.sql");
 			_fileStream = new FileStream();
 			_fileStream.addEventListener(IOErrorEvent.IO_ERROR, onLogError);
@@ -49,37 +47,23 @@ package org.sqlitewrapper {
 			var i:uint;
 			var len:uint;
 			
+			_parameters = new Array();
 			_statement = statement.text;
 			
 			for(var prop:Object in statement.parameters) { 
 				_parameters.push(statement.parameters[prop]);
-				trace("parameters "+statement.parameters[prop]);
 			} 
 			
 			// now need to add in the parameter values to the sql statement before writing to the log!
 			// work through occurrences of "?" and replace with values from the _parameters array
-			var pointer:int;
-			var lastPointer:int;
-			
 			len = _parameters.length;
 			
-			if(len == 0) {
-				_fullStatement = _statement;
-			} else {
-				_fullStatement = _statement.substring(0, _statement.indexOf("?"));
-			}
-			
 			var matchPattern:RegExp = /\?/;  
+			_fullStatement = _statement;
 			
 			for(i = 0; i < len; i++) {
-				pointer = _statement.indexOf("?", lastPointer);
-				if (pointer > 0) {
-					lastPointer = pointer;
-					_fullStatement = _statement.replace(matchPattern, _parameters[i]);
-				}
+				_fullStatement = _fullStatement.replace(matchPattern, _parameters[i]);
 			}
-			
-			trace("fullstatement "+_fullStatement);
 			
 			_data = _fullStatement + "\n";
 			_fileStream.open(_file, FileMode.APPEND);
