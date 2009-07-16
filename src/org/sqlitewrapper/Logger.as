@@ -18,12 +18,16 @@ package org.sqlitewrapper {
 	public class Logger extends EventDispatcher {
 		
 		private var _statement:String;
+		private var _fullStatement:String;
 		private var _data:String;
 		private var _file:File;
 		private var _fileStream:FileStream;
-		private var _parameters:String;
+		private var _parameters:Array;
 		
 		public function Logger():void {
+			
+			_parameters = new Array();
+			
 			_file = File.applicationStorageDirectory.resolvePath("applog.sql");
 			_fileStream = new FileStream();
 			_fileStream.addEventListener(IOErrorEvent.IO_ERROR, onLogError);
@@ -43,20 +47,41 @@ package org.sqlitewrapper {
 
 		public function writeLog(statement:SQLStatement):void {
 			var i:uint;
-			var len:uint = statement.parameters.length;
-			trace("len="+len);
+			var len:uint;
 			
 			_statement = statement.text;
-			trace("statement "+_statement);
-			if(statement.parameters) {
-				for(i = 0; i < len; i++) {
-					_parameters += statement.parameters[i];
-					trace("parameters "+_parameters);
+			
+			for(var prop:Object in statement.parameters) { 
+				_parameters.push(statement.parameters[prop]);
+				trace("parameters "+statement.parameters[prop]);
+			} 
+			
+			// now need to add in the parameter values to the sql statement before writing to the log!
+			// work through occurrences of "?" and replace with values from the _parameters array
+			var pointer:int;
+			var lastPointer:int;
+			
+			len = _parameters.length;
+			
+			if(len == 0) {
+				_fullStatement = _statement;
+			} else {
+				_fullStatement = _statement.substring(0, _statement.indexOf("?"));
+			}
+			
+			var matchPattern:RegExp = /\?/;  
+			
+			for(i = 0; i < len; i++) {
+				pointer = _statement.indexOf("?", lastPointer);
+				if (pointer > 0) {
+					lastPointer = pointer;
+					_fullStatement = _statement.replace(matchPattern, _parameters[i]);
 				}
 			}
 			
+			trace("fullstatement "+_fullStatement);
 			
-			_data = _statement + "\n";
+			_data = _fullStatement + "\n";
 			_fileStream.open(_file, FileMode.APPEND);
 			_fileStream.writeUTFBytes(_data);
 			_fileStream.close();
