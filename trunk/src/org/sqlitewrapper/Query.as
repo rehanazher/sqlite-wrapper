@@ -13,7 +13,14 @@ package org.sqlitewrapper
 		private var _sql:String;
 		private var _parameters:Array;
 		private var _data:Array;
+		
+		private var _logger:Logger;
 	
+		public function Query()
+		{
+			_logger = new Logger();
+		}
+		
 		[Bindable]
 		public function get connection():SQLConnection
 		{
@@ -76,6 +83,9 @@ package org.sqlitewrapper
 		
 		private function onQueryResult(evt:SQLEvent):void
 		{
+			// log only upon successful Query
+			_logger.writeLog(_statement);
+			
 			_data = _statement.getResult().data;
 			dispatchEvent(evt);
 		}
