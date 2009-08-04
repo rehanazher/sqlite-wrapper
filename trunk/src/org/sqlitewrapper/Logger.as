@@ -24,7 +24,11 @@ package org.sqlitewrapper {
 		private var _fileStream:FileStream;
 		private var _parameters:Array;
 		
-		public function Logger():void {
+		private var _logSelects:Boolean;
+		
+		public function Logger(logSelects:Boolean = false):void {
+			
+			_logSelects = logSelects;
 			
 			_file = File.applicationStorageDirectory.resolvePath("applog.sql");
 			_fileStream = new FileStream();
@@ -49,6 +53,15 @@ package org.sqlitewrapper {
 			
 			_parameters = new Array();
 			_statement = statement.text;
+			
+			// strip out SELECT statements if not logging them - but cater for subselects!
+			var ind:int = statement.text.indexOf("SELECT");
+			
+			if (ind > -1 && ind < 8 ) {
+				if (!_logSelects) {
+					return;
+				} 
+			}
 			
 			for(var prop:Object in statement.parameters) { 
 				_parameters.push(statement.parameters[prop]);
