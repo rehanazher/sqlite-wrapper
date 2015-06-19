@@ -1,0 +1,1 @@
+This project aims to provide a simple interface to work with local SQLite database with Adobe AIR and provide online/offline synchronization
